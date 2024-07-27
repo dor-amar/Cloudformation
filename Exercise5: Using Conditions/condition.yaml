@@ -1,0 +1,18 @@
+Parameters:
+  EnvType:
+    Description: Environment type
+    Type: String
+    Default: test
+    AllowedValues:
+      - prod
+      - test
+
+Conditions:
+  CreateProdResources: !Equals [ !Ref EnvType, prod ]
+
+Resources:
+  MyS3Bucket:
+    Type: "AWS::S3::Bucket"
+    Condition: CreateProdResources
+    Properties:
+      BucketName: my-prod-bucket-12345
