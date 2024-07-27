@@ -1,0 +1,23 @@
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: "ami-0ff8a91507f77f867"
+    us-west-1:
+      AMI: "ami-0bdb828fd58c52235"
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: "The EC2 instance type"
+
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", AMI ]

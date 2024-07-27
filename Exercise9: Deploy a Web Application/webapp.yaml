@@ -1,0 +1,63 @@
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    Description: "EC2 instance type"
+
+  DBUser:
+    Type: String
+    Description: "The database admin account username"
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: "The database admin account password"
+
+Resources:
+  MyS3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "my-web-app-bucket-${AWS::StackName}"
+
+  MySecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Allow HTTP and SSH access"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: "ami-0ff8a91507f77f867"
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          echo "<html><body><h1>Hello from ${AWS::StackName}</h1></body></html>" > /var/www/html/index.html
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+
+  MyDBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceClass: db.t2.micro
+      Engine: mysql
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      AllocatedStorage: 20
+
+Outputs:
+  WebsiteURL:
+    Description: "The URL of the web application"
+    Value: !Sub "http://${MyEC2Instance.PublicDnsName}"
