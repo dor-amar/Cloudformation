@@ -1,0 +1,24 @@
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: "The EC2 instance type"
+    
+
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: "ami-0ff8a91507f77f867"  # Replace `ami-0ff8a91507f77f867` with a valid AMI ID for your region. You can find this information in the AWS Management Console under EC2 > AMIs.
+
+
+
+
+
+
+

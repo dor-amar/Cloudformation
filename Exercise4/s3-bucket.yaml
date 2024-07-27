@@ -1,0 +1,5 @@
+Resources:
+  NestedS3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: my-nested-bucket-12345
