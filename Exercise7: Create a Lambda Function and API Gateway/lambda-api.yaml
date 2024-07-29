@@ -1,23 +1,80 @@
-Mappings:
-  RegionMap:
-    us-east-1:
-      AMI: "ami-0ff8a91507f77f867"
-    us-west-1:
-      AMI: "ami-0bdb828fd58c52235"
-
-Parameters:
-  InstanceType:
-    Type: String
-    Default: t2.micro
-    AllowedValues:
-      - t2.micro
-      - t2.small
-      - t2.medium
-    Description: "The EC2 instance type"
-
+AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  MyEC2Instance:
-    Type: "AWS::EC2::Instance"
+  MyLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
     Properties:
-      InstanceType: !Ref InstanceType
-      ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", AMI ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "MyLambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+
+  MyLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "index.handler"
+      Role: !GetAtt MyLambdaExecutionRole.Arn
+      Runtime: "nodejs18.x"
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+              const response = {
+                  statusCode: 200,
+                  body: JSON.stringify('Hello from Lambda!'),
+              };
+              return response;
+          };
+
+  MyApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "MyApiGateway"
+
+  MyApiGatewayResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt MyApiGateway.RootResourceId
+      PathPart: "mylambda"
+      RestApiId: !Ref MyApiGateway
+
+  MyApiGatewayMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      ResourceId: !Ref MyApiGatewayResource
+      RestApiId: !Ref MyApiGateway
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations"
+
+  MyApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      StageName: "prod"
+    DependsOn:
+      - MyApiGatewayMethod
+
+  MyLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref MyLambdaFunction
+      Principal: "apigateway.amazonaws.com"

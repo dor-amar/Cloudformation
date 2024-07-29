@@ -1,4 +1,4 @@
-## Exercise 5: Using Conditions
+## Exercise 7: Create a Lambda Function and API Gateway
 
 ### Objective:
 Create a CloudFormation template to create a Lambda function and expose it via API Gateway.

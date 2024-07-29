@@ -14,7 +14,7 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       InstanceType: !Ref InstanceType
-      ImageId: "ami-0ff8a91507f77f867"  # Replace `ami-0ff8a91507f77f867` with a valid AMI ID for your region. You can find this information in the AWS Management Console under EC2 > AMIs.
+      ImageId: "ami-071878317c449ae48"  # Replace `ami-0ff8a91507f77f867` with a valid AMI ID for your region. You can find this information in the AWS Management Console under EC2 > AMIs.
 
 
 

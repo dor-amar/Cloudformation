@@ -2,4 +2,4 @@ Resources:
   MyNestedStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: "URL_TO_YOUR_s3-bucket.yaml"
+      TemplateURL: "https://my-cloudformation-templates-12.s3.amazonaws.com/s3-bucket.yaml"

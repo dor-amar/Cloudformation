@@ -1,4 +1,4 @@
-## Exercise 5: Using Conditions
+## Exercise 8: Update and Change Sets
 
 ### Objective:
 Update an existing stack using change sets.
